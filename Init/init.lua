@@ -1,5 +1,6 @@
 local ghost = require("ghost")
 local credentials = require("credentials")
+local led = require("led")
 
 timeout = 20
 
@@ -7,6 +8,8 @@ function startup()
   print("MSG: starting script")
   ghost.setGhostColour(credentials.GHOST_IP, "green")
   dofile("server.lua")
+  led.init()
+  led.test()
 end
 
 function rebootWithoutInit(timer)
@@ -63,4 +66,4 @@ tmr.create():alarm(1000, tmr.ALARM_AUTO, function(cbTimer)
   end
 
 end)
-file.remove("init.lua")
+-- file.remove("init.lua")
