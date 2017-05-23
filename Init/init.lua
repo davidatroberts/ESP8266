@@ -1,13 +1,15 @@
-local ghost = require("ghost")
 local credentials = require("credentials")
-local led = require("led")
+local ghost       = require("ghost")
+local led         = require("led")
+local server      = require("server")
+local storm       = require("storm")
 
 timeout = 20
 
 function startup()
   print("MSG: starting script")
   ghost.setGhostColour(credentials.GHOST_IP, "green")
-  dofile("server.lua")
+  server.start(storm.handler)
   led.init()
   led.test()
 end
