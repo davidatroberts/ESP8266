@@ -1,9 +1,10 @@
 local storm = {}
 
-function storm.handler(handle, method, data)
-    print(handle)
-    print(method)
-    print(data)
+function storm.handler(req)
+    -- print(handle)
+    -- print(method)
+
+    -- print(string.format("%s", data))
 
     local response = {
         "HTTP/1.0 200 OK\n",

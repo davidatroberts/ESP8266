@@ -6,50 +6,85 @@ function trim(s)
   return (s:gsub ("^%s*(.-)%s*$", "%1"))
 end
 
-function getHTTPRequest(data)
-  local result = {}
+function printRequest(req)
+  print(string.format("Method: %s", req.method.method))
+  print(string.format("Method: %s", req.method.uri))
+  print(string.format("Method: %s", req.method.protocol))
 
-  local first = nil
-  local key, v, startInd, endInd
+  for k, v in pairs(req.header) do
+    print(string.format("Header: %s: %s", k, v))
+  end
 
-  for str in string.gmatch (data, "([^\n]+)") do
-    -- First line in the method and path
-    if (first == nil) then
-      first = 1
-      startInd, endInd = string.find(str, "([^ ]+)")
+  if req.body ~= nil then
+    print(string.format("Body: %s", req.body))
+  end
+end
 
-      -- get the method used to send
-      key = trim(string.sub(str, startInd, endInd))
-      result["method"] = key
+function parseRequest(data)
+  local parseMethod = function(line)
+    local tmp = {}
+    for str in string.gmatch(line, "%S+") do
+      table.insert(tmp, str)
+    end
+    return {method=tmp[1], uri=tmp[2], protocol=tmp[3]}
+  end
 
-      -- get the handle and and HTTP version
-      v = trim(string.sub(str, endInd + 2))
-      local spaceInd = string.find(v, " ")
-      result["handle"] = string.sub(v, 2, spaceInd)
-      result["version"] = string.sub(v, spaceInd)
-    else
-      -- Process ":" fields
-      result.data = {}
-      startInd, endInd = string.find(str, "([^:]+)")
-      if (endInd ~= nil) then
-        v = trim(string.sub(str, endInd + 2))
-        key = trim(string.sub(str, startInd, endInd))
-        result.data[key] = v
+  local parseHeader = function(lines)
+    local header = {}
+    for _, line in ipairs(lines) do
+      local ind = string.find(line, ":")
+      if ind ~= nil then
+        local key = trim(string.sub(line, 1, ind-1))
+        local value = trim(string.sub(line, ind+1))
+        header[key] = value
       end
+    end
+    return header
+  end
+
+  -- split the header and body 
+  local lines = {}
+  local headerEnd = string.find(data, "\r\n\r\n")
+  if not headerEnd then 
+    for str in string.gmatch(data, "([^\r\n]+)") do
+      table.insert(lines, str)
+    end
+  else
+    for str in string.gmatch(string.sub(data, 1, headerEnd), "([^\r\n]+)") do
+      table.insert(lines, str)
     end
   end
 
-  return result
+  -- parse method
+  local method = parseMethod(lines[1])
+  table.remove(lines, 1)
+
+  -- parse header
+  local header = parseHeader(lines)
+
+  -- read body
+  local body = nil
+  if headerEnd ~= nil then
+    body = string.sub(data, headerEnd+4)
+  end
+
+  local request = {
+    method = method,
+    header = header,
+    body = body
+  }
+  return request
 end
 
 function server.start(handler)
   srv:listen(80, function(conn)
     conn:on("receive", function(conn, data)
       -- get the request
-      local req = getHTTPRequest(data)
+      local req = parseRequest(data)
+      printRequest(req)
 
       -- call the handler to deal with it
-      local response = handler(req.handle, req.method, req.data)
+      local response = handler(req)
 
       -- send the response
       local function sendMessage(conn)
