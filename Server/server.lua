@@ -81,7 +81,7 @@ function server.start(handler)
     conn:on("receive", function(conn, data)
       -- get the request
       local req = parseRequest(data)
-      printRequest(req)
+      -- printRequest(req)
 
       -- call the handler to deal with it
       local response = handler(req)

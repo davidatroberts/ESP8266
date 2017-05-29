@@ -9,6 +9,7 @@ timeout = 20
 function startup()
   print("MSG: starting script")
   ghost.setGhostColour(credentials.GHOST_IP, "green")
+  storm.init()
   server.start(storm.handler)
   led.init()
   led.test()

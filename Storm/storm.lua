@@ -1,17 +1,32 @@
 local storm = {}
 
+local handleMap = {}
+
+function setColour(req)
+  print(string.format("Storm: %s", req.method.uri))
+  local colours = sjson.decode(req.body)
+  for k, v in ipairs(colours) do
+    print(string.format("%d: r:%d g:%d b:%d", k, v.red, v.green, v.blue))
+  end
+end
+
+function storm.init()
+  handleMap["/colour"] = {}
+  handleMap["/colour"]["POST"] = setColour
+end
+
 function storm.handler(req)
-    -- print(handle)
-    -- print(method)
+  -- map uri/method to function handler
+  if handleMap[req.method.uri]~=nil then
+    if handleMap[req.method.uri][req.method.method] ~= nil then
+      handleMap[req.method.uri][req.method.method](req)
+    end
+  end
 
-    -- print(string.format("%s", data))
-
-    local response = {
-        "HTTP/1.0 200 OK\n",
-        "Content-Type: text/html\n",
-        "<h1>Hello, NodeMCU</h1>\n"
-    }
-    return response
+  local response = {
+    "HTTP/1.0 200 OK\n"
+  }
+  return response
 end
 
 return storm
