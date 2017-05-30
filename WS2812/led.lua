@@ -1,19 +1,28 @@
 local led = {}
 
-function led.init()
+local buffer = {}
+local noLEDs = 0
+
+function led.init(n)
+  noLEDs = n
+
   ws2812.init()
+  buffer = ws2812.newBuffer(noLEDs, 3)
+
+  for i=1, noLEDs do
+    buffer:set(i, 255, 255, 255)
+  end
+  ws2812.write(buffer)
+
 end
 
-function led.test()
-  ws2812.write(string.char(
-    255, 0, 0,
-    0, 255, 0,
-    0, 0, 255,
-    255, 0, 0,
-    0, 255, 0,
-    0, 0, 255,
-    255, 0, 0,
-    0, 255, 0))
+function led.setColours(colours)
+  for i=0, noLEDs-1 do
+    local ledInd = (i % #colours)+1
+    local colour = colours[ledInd]
+    buffer:set(i+1, colour.green, colour.red, colour.blue)
+  end
+  ws2812.write(buffer)
 end
 
 return led

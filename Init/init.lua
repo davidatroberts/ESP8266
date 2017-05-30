@@ -1,6 +1,5 @@
 local credentials = require("credentials")
 local ghost       = require("ghost")
-local led         = require("led")
 local server      = require("server")
 local storm       = require("storm")
 
@@ -11,8 +10,6 @@ function startup()
   ghost.setGhostColour(credentials.GHOST_IP, "green")
   storm.init()
   server.start(storm.handler)
-  led.init()
-  led.test()
 end
 
 function rebootWithoutInit(timer)
