@@ -3,14 +3,22 @@ local led = require("led")
 local storm = {}
 
 local handleMap = {}
+local fadeTmr = tmr.create()
 
 function setColour(req)
   print(string.format("Storm: %s", req.method.uri))
   local colours = sjson.decode(req.body)
-  -- for k, v in ipairs(colours) do
-  --   print(string.format("%d: r:%d g:%d b:%d", k, v.red, v.green, v.blue))
-  -- end
   led.setColours(colours)
+end
+
+function setFade(req)
+    local fadeData = sjson.decode(req.body)
+    
+end
+
+function stopFade(req)
+  fadeTmr:stop()
+  fadeTmr:unregister()
 end
 
 function storm.init()
@@ -18,6 +26,10 @@ function storm.init()
 
   handleMap["/colour"] = {}
   handleMap["/colour"]["POST"] = setColour
+  handleMap["/fade"] = {}
+  handleMap["/fade"]["POST"] = setFade
+  handleMap["/stopfade"] = {}
+  handleMap["/stopfade"]["POST"] = stopFade
 end
 
 function storm.handler(req)
