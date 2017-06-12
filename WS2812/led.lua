@@ -25,4 +25,10 @@ function led.setColours(colours)
   ws2812.write(buffer)
 end
 
+function led.setColour(colour)
+  local colours = {}
+  table.insert(colours, colour)
+  led.setColours(colours)
+end
+
 return led

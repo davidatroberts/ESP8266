@@ -1,9 +1,11 @@
 local led = require("led")
+local cos = require("cos")
 
 local storm = {}
 
 local handleMap = {}
 local fadeTmr = tmr.create()
+local deg = 360
 
 function setColour(req)
   print(string.format("Storm: %s", req.method.uri))
@@ -12,8 +14,15 @@ function setColour(req)
 end
 
 function setFade(req)
-    local fadeData = sjson.decode(req.body)
-    
+  local colour = sjson.decode(req.body)
+  fadeTmr:register(50, tmr.ALARM_AUTO, function()
+    local val, nextDeg = cos.value(deg, 2)
+    deg = nextDeg
+    colour.red = colour.red*val
+    colour.green = colour.green*val
+    colour.blue = colour.blue*val
+    led.setColour(colour)
+  end)
 end
 
 function stopFade(req)
